@@ -46,7 +46,7 @@ fun PropertiesLazyList(
         isBookmarked: Boolean
     ) -> Unit
 ) {
-    if (properties.loadState.refresh == LoadState.Loading) {
+    if (properties.loadState.refresh == LoadState.Loading && properties.itemCount == 0) {
         CircularProgressIndicator(
             modifier = Modifier
                 .fillMaxSize()
