@@ -12,6 +12,9 @@ interface PropertyDao {
     @Query("SELECT * FROM properties")
     fun getAllProperties(): PagingSource<Int, PropertyEntity>
 
+    @Query("DELETE FROM properties")
+    suspend fun deleteAllProperties()
+
     @Insert
     suspend fun insertAllProperties(propertyEntities: List<PropertyEntity>)
 }

@@ -5,10 +5,10 @@ import com.app.realestatedemoapp.data.remote.dto.PropertyDto
 
 fun PropertyDto.toEntity() = PropertyEntity(
     id = this.id,
-    title = this.title,
-    price = this.price.amount,
+    title = this.localization.locale.title.text,
+    price = this.priceDetails.priceDto.amount,
     locality = this.address.locality,
-    street = this.address.street,
-    imageUrl = this.images[0].url,
+    street = this.address.street ?: "",
+    imageUrl = this.localization.locale.attachments[0].url,
     isBookmarked = false
 )

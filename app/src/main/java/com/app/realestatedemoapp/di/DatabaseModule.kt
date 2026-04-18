@@ -3,6 +3,7 @@ package com.app.realestatedemoapp.di
 import android.content.Context
 import androidx.room.Room
 import com.app.realestatedemoapp.data.local.AppDatabase
+import com.app.realestatedemoapp.data.local.dao.PropertyDao
 import com.app.realestatedemoapp.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -22,4 +23,7 @@ object DatabaseModule {
     ): AppDatabase = Room.databaseBuilder(
         context, AppDatabase::class.java, Constants.DB_NAME
     ).build()
+
+    @Provides
+    fun providePropertyDao(db: AppDatabase): PropertyDao = db.propertyDao()
 }

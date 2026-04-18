@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class PropertyModel(
-    val id: Int,
+    val id: Long,
     val title: String,
     val price: Long,
     val locality: String,

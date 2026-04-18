@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "properties")
 data class PropertyEntity(
     @PrimaryKey
-    val id: Int,
+    val id: Long,
     val title: String,
     val price: Long,
     val locality: String,
