@@ -10,5 +10,14 @@ data class PropertyModel(
     val locality: String,
     val street: String,
     val imageUrl: String,
-    val isBookmarked: Boolean
-)
+    val isBookmarked: Boolean,
+    val currency: String
+) {
+    fun getFullAddress() = if (street.isNotEmpty()) {
+        "$street, $locality"
+    } else {
+        locality
+    }
+
+    fun getFormattedPrice() = "$price $currency"
+}

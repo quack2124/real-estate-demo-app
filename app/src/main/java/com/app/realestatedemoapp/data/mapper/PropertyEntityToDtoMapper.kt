@@ -11,6 +11,7 @@ fun PropertyEntity.toDomain(): PropertyModel {
         locality = this.locality,
         street = this.street,
         imageUrl = this.imageUrl,
-        isBookmarked = this.isBookmarked
+        isBookmarked = this.isBookmarked,
+        currency = this.currency
     )
 }

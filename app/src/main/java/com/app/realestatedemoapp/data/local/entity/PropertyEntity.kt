@@ -10,6 +10,7 @@ data class PropertyEntity(
     val id: Long,
     val title: String,
     val price: Long,
+    val currency: String,
     val locality: String,
     val street: String,
     val imageUrl: String,

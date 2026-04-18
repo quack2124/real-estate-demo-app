@@ -10,7 +10,7 @@ data class PropertyDto(
 )
 
 data class PriceDetailsDto(
-    @SerializedName("buy") val priceDto: PriceDto
+    @SerializedName("buy") val priceDto: PriceDto, val currency: String
 )
 
 data class PriceDto(

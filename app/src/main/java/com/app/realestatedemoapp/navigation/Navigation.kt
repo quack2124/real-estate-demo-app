@@ -1,4 +1,4 @@
-package com.app.realestatedemoapp.presentation.navigation
+package com.app.realestatedemoapp.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,6 +31,7 @@ fun AppNavHost(
 ) {
     NavHost(
         navController,
+        modifier = modifier,
         startDestination = startDestination.route
     ) {
         Destination.entries.forEach { destination ->
@@ -46,4 +47,3 @@ fun AppNavHost(
         }
     }
 }
-

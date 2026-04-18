@@ -21,9 +21,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.rememberNavController
-import com.app.realestatedemoapp.presentation.navigation.AppNavHost
-import com.app.realestatedemoapp.presentation.navigation.Destination
-import com.app.realestatedemoapp.presentation.navigation.destinations
+import com.app.realestatedemoapp.navigation.AppNavHost
+import com.app.realestatedemoapp.navigation.Destination
+import com.app.realestatedemoapp.navigation.destinations
 import com.app.realestatedemoapp.ui.theme.RealEstateDemoAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
