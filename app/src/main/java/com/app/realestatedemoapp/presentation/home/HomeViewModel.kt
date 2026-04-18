@@ -15,11 +15,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    propertyRepository: PropertyRepository,
+    val propertyRepository: PropertyRepository,
     val updateBookmarkUseCase: UpdateBookmarkUseCase
 ) : ViewModel() {
 
     init {
+        refreshProperties()
+    }
+
+    fun refreshProperties() {
         viewModelScope.launch(Dispatchers.IO) { propertyRepository.refreshProperties() }
     }
 
