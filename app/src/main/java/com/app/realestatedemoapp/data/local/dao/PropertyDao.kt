@@ -15,6 +15,9 @@ interface PropertyDao {
     @Query("SELECT * FROM properties WHERE isBookmarked = 1")
     suspend fun getBookmarkedProperties(): List<PropertyEntity>
 
+    @Query("SELECT * FROM properties WHERE isBookmarked = 1")
+    fun getBookmarkedPropertiesPaginated(): PagingSource<Int, PropertyEntity>
+
     @Query("DELETE FROM properties")
     suspend fun deleteAllProperties()
 

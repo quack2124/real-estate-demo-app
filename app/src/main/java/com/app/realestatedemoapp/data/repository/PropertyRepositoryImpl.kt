@@ -27,6 +27,12 @@ class PropertyRepositoryImpl @Inject constructor(
             pagingSourceFactory = { propertyDao.getAllProperties() }).flow.map { pagingData -> pagingData.map { it.toDomain() } }
     }
 
+    override fun getBookmarkedProperties(): Flow<PagingData<PropertyModel>> {
+        return Pager(
+            config = PagingConfig(pageSize = Constants.SIZE, prefetchDistance = 5),
+            pagingSourceFactory = { propertyDao.getBookmarkedPropertiesPaginated() }).flow.map { pagingData -> pagingData.map { it.toDomain() } }
+    }
+
     override suspend fun refreshProperties() {
         val properties = apiService.getProperties()
         val bookmarkedIds = propertyDao.getBookmarkedProperties().map { it.id }.toSet()

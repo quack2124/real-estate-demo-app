@@ -1,4 +1,4 @@
-package com.app.realestatedemoapp.presentation.home
+package com.app.realestatedemoapp.presentation.bookmark
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,20 +14,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class BookmarkViewModel @Inject constructor(
     propertyRepository: PropertyRepository,
     val updateBookmarkUseCase: UpdateBookmarkUseCase
-) : ViewModel() {
+) :
+    ViewModel() {
 
-    init {
-        viewModelScope.launch(Dispatchers.IO) { propertyRepository.refreshProperties() }
-    }
-
-    val properties = propertyRepository.getProperties().cachedIn(viewModelScope).stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = PagingData.empty()
-    )
+    val bookmarkedProperties =
+        propertyRepository.getBookmarkedProperties().cachedIn(viewModelScope).stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PagingData.empty()
+        )
 
     fun updateBookmark(propertyId: Long, isBookmarked: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {

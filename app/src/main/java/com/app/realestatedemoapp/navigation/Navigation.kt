@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.app.realestatedemoapp.presentation.bookmark.BookmarkScreen
+import com.app.realestatedemoapp.presentation.bookmark.BookmarkViewModel
 import com.app.realestatedemoapp.presentation.home.HomeScreen
 import com.app.realestatedemoapp.presentation.home.HomeViewModel
 
@@ -37,7 +38,11 @@ fun AppNavHost(
         Destination.entries.forEach { destination ->
             composable(destination.route) {
                 when (destination) {
-                    Destination.Bookmarks -> BookmarkScreen()
+                    Destination.Bookmarks -> {
+                        val viewModel: BookmarkViewModel = hiltViewModel()
+                        BookmarkScreen(viewModel)
+                    }
+
                     Destination.Home -> {
                         val viewModel: HomeViewModel = hiltViewModel()
                         HomeScreen(viewModel)
