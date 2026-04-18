@@ -28,12 +28,17 @@ class PropertyRepositoryImpl @Inject constructor(
     }
 
     override suspend fun refreshProperties() {
-        propertyDao.deleteAllProperties()
         val properties = apiService.getProperties()
-        val entities = properties.results.map {
-            it.listing.toEntity()
-        }
-        propertyDao.insertAllProperties(entities)
-    }
-}
+        val bookmarkedIds = propertyDao.getBookmarkedProperties().map { it.id }.toSet()
+        propertyDao.deleteAllProperties()
 
+        val newEntitiesWithBookmarksPreserved = properties.results.map {
+            it.listing.toEntity().copy(isBookmarked = bookmarkedIds.contains(it.listing.id))
+        }
+
+        propertyDao.insertAllProperties(newEntitiesWithBookmarksPreserved)
+    }
+
+    override suspend fun updatePropertyBookmark(propertyId: Long, isBookmarked: Boolean) =
+        propertyDao.updatePropertyBookmark(propertyId, isBookmarked)
+}

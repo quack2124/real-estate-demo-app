@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(propertyRepository: PropertyRepository) : ViewModel() {
+class HomeViewModel @Inject constructor(val propertyRepository: PropertyRepository) : ViewModel() {
 
     init {
         viewModelScope.launch(Dispatchers.IO) { propertyRepository.refreshProperties() }
@@ -24,4 +24,13 @@ class HomeViewModel @Inject constructor(propertyRepository: PropertyRepository) 
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = PagingData.empty()
     )
+
+    fun updateBookmark(propertyId: Long, isBookmarked: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            propertyRepository.updatePropertyBookmark(
+                propertyId,
+                isBookmarked
+            )
+        }
+    }
 }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -76,13 +77,14 @@ fun HomeScreen(viewModel: HomeViewModel) {
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         )
                         IconButton(
-                            onClick = {},
+                            onClick = { viewModel.updateBookmark(item.id, !item.isBookmarked) },
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(horizontal = 6.dp, vertical = 6.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Favorite,
+                                imageVector = if (item.isBookmarked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                                tint = Color.Red,
                                 contentDescription = stringResource(R.string.favorites_icon)
                             )
                         }

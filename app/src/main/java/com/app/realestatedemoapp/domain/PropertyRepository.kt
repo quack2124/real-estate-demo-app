@@ -8,4 +8,5 @@ interface PropertyRepository {
 
     fun getProperties(): Flow<PagingData<PropertyModel>>
     suspend fun refreshProperties()
+    suspend fun updatePropertyBookmark(propertyId: Long, isBookmarked: Boolean)
 }
