@@ -7,11 +7,11 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "properties")
 data class PropertyEntity(
     @PrimaryKey
-    private val id: Int,
-    private val title: String,
-    private val price: Long,
-    private val locality: String,
-    private val street: String,
-    private val imageUrl: String,
-    private val isBookmarked: Boolean
+    val id: Int,
+    val title: String,
+    val price: Long,
+    val locality: String,
+    val street: String,
+    val imageUrl: String,
+    val isBookmarked: Boolean
 )
