@@ -4,4 +4,6 @@
     <string name="property_image">Property image</string>
     <string name="favorites_icon">Favorites icon</string>
     <string name="location_icon">Location icon</string>
+    <string name="no_internet_connection">You are offline</string>
+    <string name="no_internet_icon">no internet icon</string>
 </resources>

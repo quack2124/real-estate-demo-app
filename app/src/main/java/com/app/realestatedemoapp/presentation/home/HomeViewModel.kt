@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.app.realestatedemoapp.domain.NetworkConnectivityObserver
 import com.app.realestatedemoapp.domain.PropertyRepository
+import com.app.realestatedemoapp.domain.model.NetworkStatus
 import com.app.realestatedemoapp.domain.usecases.UpdateBookmarkUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -16,8 +18,15 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     val propertyRepository: PropertyRepository,
-    val updateBookmarkUseCase: UpdateBookmarkUseCase
+    val updateBookmarkUseCase: UpdateBookmarkUseCase,
+    connectivityObserver: NetworkConnectivityObserver
 ) : ViewModel() {
+
+    val networkStatus = connectivityObserver.observe().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = NetworkStatus.Connected
+    )
 
     init {
         refreshProperties()
