@@ -14,10 +14,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -41,11 +37,9 @@ import com.app.realestatedemoapp.domain.model.PropertyModel
 
 @Composable
 fun PropertiesLazyList(
-    properties: LazyPagingItems<PropertyModel>, onBookmark: (
-        propertyId: Long,
-        isBookmarked: Boolean
-    ) -> Unit
+    properties: LazyPagingItems<PropertyModel>?, onBookmark: (Long, Boolean) -> Unit
 ) {
+    if (properties == null) return
     if (properties.loadState.refresh == LoadState.Loading && properties.itemCount == 0) {
         CircularProgressIndicator(
             modifier = Modifier
@@ -61,7 +55,7 @@ fun PropertiesLazyList(
                     property.id
                 }) { item ->
                 Card(
-                    border = BorderStroke(2.dp, Color.Black),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
@@ -98,7 +92,9 @@ fun PropertiesLazyList(
                                     .padding(horizontal = 6.dp, vertical = 6.dp)
                             ) {
                                 Icon(
-                                    imageVector = if (item.isBookmarked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                                    painter = if (item.isBookmarked) painterResource(R.drawable.ic_favorite_fill_24dp) else painterResource(
+                                        R.drawable.ic_favorite_outline_24dp
+                                    ),
                                     tint = Color.Red,
                                     contentDescription = stringResource(R.string.favorites_icon)
                                 )
@@ -119,12 +115,13 @@ fun PropertiesLazyList(
                             )
                             Row {
                                 Icon(
-                                    imageVector = Icons.Filled.Map,
+                                    painter = painterResource(R.drawable.ic_location_pin_fill_24dp),
                                     contentDescription = stringResource(R.string.location_icon),
+                                    tint = MaterialTheme.colorScheme.secondary,
                                     modifier = Modifier.padding(end = 8.dp)
                                 )
                                 Text(
-                                    text = item.getFullAddress(),
+                                    text = item.getFullAddress(), color = Color.Black
                                 )
                             }
                         }

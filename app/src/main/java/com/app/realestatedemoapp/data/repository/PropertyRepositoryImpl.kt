@@ -26,33 +26,62 @@ class PropertyRepositoryImpl @Inject constructor(
 ) : PropertyRepository {
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun getProperties(): Flow<PagingData<PropertyModel>> {
-        return Pager(
-            config = PagingConfig(pageSize = Constants.SIZE, prefetchDistance = 5),
-            pagingSourceFactory = { propertyDao.getAllProperties() }).flow.map { pagingData -> pagingData.map { it.toDomain() } }
-    }
+    override fun getProperties(): Result<Flow<PagingData<PropertyModel>>> {
+        try {
+            val result = Pager(
+                config = PagingConfig(pageSize = Constants.SIZE, prefetchDistance = 5),
+                pagingSourceFactory = { propertyDao.getAllProperties() }).flow.map { pagingData -> pagingData.map { it.toDomain() } }
 
-    override fun getBookmarkedProperties(): Flow<PagingData<PropertyModel>> {
-        return Pager(
-            config = PagingConfig(pageSize = Constants.SIZE, prefetchDistance = 5),
-            pagingSourceFactory = { propertyDao.getBookmarkedPropertiesPaginated() }).flow.map { pagingData -> pagingData.map { it.toDomain() } }
-    }
-
-    override suspend fun refreshProperties() {
-        if (connectivityObserver.observe().first() == NetworkStatus.Disconnected) {
-            return
+            return Result.success(result)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return Result.failure(e)
         }
-        val properties = apiService.getProperties()
-        val bookmarkedIds = propertyDao.getBookmarkedProperties().map { it.id }.toSet()
-        propertyDao.deleteAllProperties()
-
-        val newEntitiesWithBookmarksPreserved = properties.results.map {
-            it.listing.toEntity().copy(isBookmarked = bookmarkedIds.contains(it.listing.id))
-        }
-
-        propertyDao.insertAllProperties(newEntitiesWithBookmarksPreserved)
     }
 
-    override suspend fun updatePropertyBookmark(propertyId: Long, isBookmarked: Boolean) =
-        propertyDao.updatePropertyBookmark(propertyId, isBookmarked)
+    override fun getBookmarkedProperties(): Result<Flow<PagingData<PropertyModel>>> {
+        try {
+            val result = Pager(
+                config = PagingConfig(pageSize = Constants.SIZE, prefetchDistance = 5),
+                pagingSourceFactory = { propertyDao.getBookmarkedPropertiesPaginated() }).flow.map { pagingData -> pagingData.map { it.toDomain() } }
+
+            return Result.success(result)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return Result.failure(e)
+        }
+    }
+
+    override suspend fun refreshProperties(): Result<Unit> {
+        return try {
+            if (connectivityObserver.observe().first() == NetworkStatus.Disconnected) {
+                return Result.failure(Exception("No internet connection"))
+            }
+            val properties = apiService.getProperties()
+            val bookmarkedIds = propertyDao.getBookmarkedProperties().map { it.id }.toSet()
+            propertyDao.deleteAllProperties()
+
+            val newEntitiesWithBookmarksPreserved = properties.results.map {
+                it.listing.toEntity().copy(isBookmarked = bookmarkedIds.contains(it.listing.id))
+            }
+
+            propertyDao.insertAllProperties(newEntitiesWithBookmarksPreserved)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updatePropertyBookmark(
+        propertyId: Long, isBookmarked: Boolean
+    ): Result<Unit> {
+        return try {
+            propertyDao.updatePropertyBookmark(propertyId, isBookmarked)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
 }

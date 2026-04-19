@@ -58,7 +58,6 @@ dependencies {
     implementation(libs.androidx.paging.compose)
     implementation(libs.coil3.coil.compose)
     implementation(libs.coil.network.okhttp)
-    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.paging.common)
     ksp(libs.androidx.room.compiler)

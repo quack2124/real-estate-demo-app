@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -13,12 +14,14 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.rememberNavController
 import com.app.realestatedemoapp.navigation.AppNavHost
@@ -50,13 +53,23 @@ private fun Root() {
     Scaffold(
         topBar = {
             Column {
-                CenterAlignedTopAppBar(title = {
-                    Text(
-                        text = stringResource(R.string.real_estate_demo_app),
-                        style = MaterialTheme.typography.titleLarge
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(R.string.real_estate_demo_app),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                })
-                PrimaryTabRow(selectedTabIndex = selectedDestination) {
+                )
+                PrimaryTabRow(
+                    selectedTabIndex = selectedDestination,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
                     destinations.forEachIndexed { index, destination ->
                         Tab(selected = selectedDestination == index, onClick = {
                             navController.navigate(route = destination.route)
@@ -70,7 +83,9 @@ private fun Root() {
     ) { innerPadding ->
         AppNavHost(
             navController = navController,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier
+                .padding(innerPadding)
+                .background(Color.White),
             startDestination = startDestination
 
         )
