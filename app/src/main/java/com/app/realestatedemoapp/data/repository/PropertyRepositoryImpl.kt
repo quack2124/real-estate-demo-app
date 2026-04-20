@@ -9,20 +9,16 @@ import com.app.realestatedemoapp.data.local.dao.PropertyDao
 import com.app.realestatedemoapp.data.mapper.toDomain
 import com.app.realestatedemoapp.data.mapper.toEntity
 import com.app.realestatedemoapp.data.remote.ApiService
-import com.app.realestatedemoapp.domain.NetworkConnectivityObserver
 import com.app.realestatedemoapp.domain.PropertyRepository
-import com.app.realestatedemoapp.domain.model.NetworkStatus
 import com.app.realestatedemoapp.domain.model.PropertyModel
 import com.app.realestatedemoapp.util.Constants
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class PropertyRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
     private val propertyDao: PropertyDao,
-    val connectivityObserver: NetworkConnectivityObserver
 ) : PropertyRepository {
 
     @OptIn(ExperimentalPagingApi::class)
@@ -54,9 +50,6 @@ class PropertyRepositoryImpl @Inject constructor(
 
     override suspend fun refreshProperties(): Result<Unit> {
         return try {
-            if (connectivityObserver.observe().first() == NetworkStatus.Disconnected) {
-                return Result.failure(Exception("No internet connection"))
-            }
             val properties = apiService.getProperties()
             val bookmarkedIds = propertyDao.getBookmarkedProperties().map { it.id }.toSet()
             propertyDao.deleteAllProperties()

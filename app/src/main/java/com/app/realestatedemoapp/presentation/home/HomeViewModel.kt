@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,7 +23,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     val propertyRepository: PropertyRepository,
     val updateBookmarkUseCase: UpdateBookmarkUseCase,
-    connectivityObserver: NetworkConnectivityObserver
+    val connectivityObserver: NetworkConnectivityObserver
 ) : ViewModel() {
 
     val networkStatus = connectivityObserver.observe().stateIn(
@@ -40,10 +41,10 @@ class HomeViewModel @Inject constructor(
 
     fun refreshProperties() {
         viewModelScope.launch(Dispatchers.IO) {
-            propertyRepository.refreshProperties().onFailure { error ->
-                if (error.message == "No internet connection") {
-                    _errorMessage.value = R.string.no_internet_connection
-                } else {
+            if (connectivityObserver.observe().first() == NetworkStatus.Disconnected) {
+                _errorMessage.value = R.string.no_internet_connection
+            } else {
+                propertyRepository.refreshProperties().onFailure {
                     _errorMessage.value = R.string.failed_to_fetch_properties
                 }
             }
