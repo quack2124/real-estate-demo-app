@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName
 
 
 data class LocalizationDto(
-    @SerializedName("de") val locale: Locale
+    @SerializedName("de") val locale: LocaleDto
 )
 
-data class Locale(
+data class LocaleDto(
     @SerializedName("attachments") val attachments: List<AttachmentDto>,
     @SerializedName("text") val title: TitleDto
 )
