@@ -42,3 +42,5 @@ maintainability, and testability.
 
 - **Unit Tests**: Run `./gradlew test` in the terminal or right-click the `test` directory in
   Android Studio.
+- **UI Tests**: Run `./gradlew connectedAndroidTest` or right-click the `androidTest` directory in
+  Android Studio.
