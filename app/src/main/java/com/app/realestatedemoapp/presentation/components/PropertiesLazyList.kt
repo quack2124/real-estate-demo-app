@@ -96,7 +96,9 @@ fun PropertiesLazyList(
                                         R.drawable.ic_favorite_outline_24dp
                                     ),
                                     tint = Color.Red,
-                                    contentDescription = stringResource(R.string.favorites_icon)
+                                    contentDescription = if (item.isBookmarked) stringResource(R.string.favorites_icon_filled) else stringResource(
+                                        R.string.favorites_icon_outlined
+                                    )
                                 )
                             }
 
