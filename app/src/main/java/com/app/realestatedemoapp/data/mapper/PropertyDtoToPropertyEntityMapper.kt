@@ -9,7 +9,7 @@ fun PropertyDto.toEntity() = PropertyEntity(
     price = this.priceDetails.priceDto.amount,
     locality = this.address.locality,
     street = this.address.street ?: "",
-    imageUrl = this.localization.locale.attachments[0].url,
+    imageUrl = this.localization.locale.attachments.firstOrNull()?.url.orEmpty(),
     isBookmarked = false,
     currency = this.priceDetails.currency
 )
