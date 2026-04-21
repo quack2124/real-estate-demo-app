@@ -10,4 +10,5 @@
     <string name="failed_to_fetch_bookmarked_properties">Failed to fetch bookmarked properties</string>
     <string name="failed_to_fetch_properties">Failed to fetch properties</string>
     <string name="failed_to_update_bookmark_state">Failed to update bookmark state</string>
+    <string name="loading_indicator">loading_indicator</string>
 </resources>
