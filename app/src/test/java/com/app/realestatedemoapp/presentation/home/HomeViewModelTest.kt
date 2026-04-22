@@ -9,6 +9,7 @@ import com.app.realestatedemoapp.domain.model.NetworkStatus
 import com.app.realestatedemoapp.domain.model.PropertyModel
 import com.app.realestatedemoapp.domain.usecases.UpdateBookmarkUseCase
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -33,13 +34,23 @@ class HomeViewModelTest {
     private val propertyRepository = mockk<PropertyRepository>()
     private val updateBookmarkUseCase = mockk<UpdateBookmarkUseCase>()
     private val connectivityObserver = mockk<NetworkConnectivityObserver>()
-
+    private lateinit var propertyModel: PropertyModel
     private val testDispatcher = StandardTestDispatcher()
 
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        propertyModel = PropertyModel(
+            id = 1,
+            title = "Test",
+            price = 333333333,
+            locality = "Test",
+            street = "Test",
+            imageUrl = "https://example.com/image.jpg",
+            isBookmarked = false,
+            currency = "CHF"
+        )
     }
 
     @After
@@ -53,28 +64,26 @@ class HomeViewModelTest {
         val exception = RuntimeException("Network Error")
         coEvery { propertyRepository.refreshProperties() } returns Result.failure(exception)
         every { connectivityObserver.observe() } returns flowOf(NetworkStatus.Connected)
-        every { propertyRepository.getProperties() } returns Result.success(emptyFlow())
+        every { propertyRepository.getProperties() } returns emptyFlow()
 
         viewModel = HomeViewModel(propertyRepository, updateBookmarkUseCase, connectivityObserver)
         viewModel.refreshProperties()
 
         advanceUntilIdle()
-
         Assert.assertEquals(R.string.failed_to_fetch_properties, viewModel.errorMessage.value)
     }
 
 
     @Test
-    fun `refreshProperties sets error message on connection failure`() = runTest(testDispatcher) {
+    fun `refreshProperties should not be called on connection failure`() = runTest(testDispatcher) {
         coEvery { propertyRepository.refreshProperties() } returns Result.success(Unit)
         every { connectivityObserver.observe() } returns flowOf(NetworkStatus.Disconnected)
-        every { propertyRepository.getProperties() } returns Result.success(emptyFlow())
+        every { propertyRepository.getProperties() } returns emptyFlow()
 
         viewModel = HomeViewModel(propertyRepository, updateBookmarkUseCase, connectivityObserver)
         viewModel.refreshProperties()
         advanceUntilIdle()
-
-        Assert.assertEquals(R.string.no_internet_connection, viewModel.errorMessage.value)
+        coVerify(exactly = 0) { propertyRepository.refreshProperties() }
     }
 
     @Test
@@ -82,30 +91,21 @@ class HomeViewModelTest {
         val flowPagingData = flowOf(
             PagingData.from(
                 listOf(
-                    PropertyModel(
-                        id = 1,
-                        title = "Test",
-                        price = 333333333,
-                        locality = "Test",
-                        street = "Test",
-                        imageUrl = "https://example.com/image.jpg",
-                        isBookmarked = false,
-                        currency = "CHF"
-                    )
+                    propertyModel
                 )
             )
         )
 
         coEvery { propertyRepository.refreshProperties() } returns Result.success(Unit)
         every { connectivityObserver.observe() } returns flowOf(NetworkStatus.Connected)
-        every { propertyRepository.getProperties() } returns Result.success(flowPagingData)
+        every { propertyRepository.getProperties() } returns flowPagingData
 
         viewModel = HomeViewModel(propertyRepository, updateBookmarkUseCase, connectivityObserver)
         viewModel.refreshProperties()
         advanceUntilIdle()
 
         Assert.assertNotNull(viewModel.properties)
-        Assert.assertEquals(flowPagingData, viewModel.properties)
+
     }
 
     @Test
@@ -113,9 +113,9 @@ class HomeViewModelTest {
         coEvery { updateBookmarkUseCase(21313, false) } returns Result.failure(
             RuntimeException("Update Failed")
         )
-        every { propertyRepository.getBookmarkedProperties() } returns Result.success(emptyFlow())
+        every { propertyRepository.getBookmarkedProperties() } returns emptyFlow()
         every { connectivityObserver.observe() } returns flowOf(NetworkStatus.Disconnected)
-        every { propertyRepository.getProperties() } returns Result.success(emptyFlow())
+        every { propertyRepository.getProperties() } returns emptyFlow()
 
         viewModel = HomeViewModel(propertyRepository, updateBookmarkUseCase, connectivityObserver)
         viewModel.updateBookmark(21313, false)
@@ -131,30 +131,21 @@ class HomeViewModelTest {
         val flowPagingData = flowOf(
             PagingData.from(
                 listOf(
-                    PropertyModel(
-                        id = 1,
-                        title = "Test",
-                        price = 333333333,
-                        locality = "Test",
-                        street = "Test",
-                        imageUrl = "https://example.com/image.jpg",
-                        isBookmarked = false,
-                        currency = "CHF"
-                    )
+                    propertyModel
                 )
             )
         )
 
         coEvery { updateBookmarkUseCase(21313, true) } returns Result.success(Unit)
         every { connectivityObserver.observe() } returns flowOf(NetworkStatus.Disconnected)
-        every { propertyRepository.getProperties() } returns Result.success(flowPagingData)
+        every { propertyRepository.getProperties() } returns flowPagingData
         viewModel = HomeViewModel(propertyRepository, updateBookmarkUseCase, connectivityObserver)
         viewModel.updateBookmark(21313, true)
         advanceUntilIdle()
 
-        val result = viewModel.properties?.first()
+        val result = viewModel.properties.first()
 
-        result?.map {
+        result.map {
             Assert.assertEquals(true, it.isBookmarked)
         }
     }

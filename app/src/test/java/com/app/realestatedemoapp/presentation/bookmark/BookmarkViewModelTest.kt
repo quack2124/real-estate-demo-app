@@ -49,7 +49,7 @@ class BookmarkViewModelTest {
         coEvery { updateBookmarkUseCase(21313, false) } returns Result.failure(
             RuntimeException("Update Failed")
         )
-        every { propertyRepository.getBookmarkedProperties() } returns Result.success(emptyFlow())
+        every { propertyRepository.getBookmarkedProperties() } returns emptyFlow()
 
         viewModel = BookmarkViewModel(propertyRepository, updateBookmarkUseCase)
 
@@ -85,16 +85,14 @@ class BookmarkViewModelTest {
             )
 
             coEvery { updateBookmarkUseCase(21313, true) } returns Result.success(Unit)
-            every { propertyRepository.getBookmarkedProperties() } returns Result.success(
-                flowPagingData
-            )
+            every { propertyRepository.getBookmarkedProperties() } returns flowPagingData
             viewModel = BookmarkViewModel(propertyRepository, updateBookmarkUseCase)
             viewModel.updateBookmark(21313, true)
             advanceUntilIdle()
 
-            val result = viewModel.bookmarkedProperties?.first()
+            val result = viewModel.bookmarkedProperties.first()
 
-            result?.map {
+            result.map {
                 Assert.assertEquals(true, it.isBookmarked)
             }
 
