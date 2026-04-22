@@ -41,9 +41,7 @@ class HomeViewModel @Inject constructor(
 
     fun refreshProperties() {
         viewModelScope.launch(Dispatchers.IO) {
-            if (connectivityObserver.observe().first() == NetworkStatus.Disconnected) {
-                _errorMessage.value = R.string.no_internet_connection
-            } else {
+            if (connectivityObserver.observe().first() == NetworkStatus.Connected) {
                 propertyRepository.refreshProperties().onFailure {
                     _errorMessage.value = R.string.failed_to_fetch_properties
                 }
@@ -51,13 +49,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    val properties = propertyRepository.getProperties().onSuccess {
-        it.cachedIn(viewModelScope).stateIn(
+    val properties = propertyRepository.getProperties()
+        .cachedIn(viewModelScope).stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = PagingData.empty()
         )
-    }.onFailure { _errorMessage.value = R.string.failed_to_fetch_properties }.getOrNull()
 
     fun updateBookmark(propertyId: Long, isBookmarked: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {

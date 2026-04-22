@@ -22,30 +22,23 @@ class PropertyRepositoryImpl @Inject constructor(
 ) : PropertyRepository {
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun getProperties(): Result<Flow<PagingData<PropertyModel>>> {
-        try {
-            val result = Pager(
-                config = PagingConfig(pageSize = Constants.SIZE, prefetchDistance = 5),
-                pagingSourceFactory = { propertyDao.getAllProperties() }).flow.map { pagingData -> pagingData.map { it.toDomain() } }
+    override fun getProperties(): Flow<PagingData<PropertyModel>> {
+        val result = Pager(
+            config = PagingConfig(pageSize = Constants.SIZE, prefetchDistance = 5),
+            pagingSourceFactory = { propertyDao.getAllProperties() }).flow
+            .map { pagingData -> pagingData.map { it.toDomain() } }
 
-            return Result.success(result)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return Result.failure(e)
-        }
+        return result
+
     }
 
-    override fun getBookmarkedProperties(): Result<Flow<PagingData<PropertyModel>>> {
-        try {
-            val result = Pager(
-                config = PagingConfig(pageSize = Constants.SIZE, prefetchDistance = 5),
-                pagingSourceFactory = { propertyDao.getBookmarkedPropertiesPaginated() }).flow.map { pagingData -> pagingData.map { it.toDomain() } }
+    override fun getBookmarkedProperties(): Flow<PagingData<PropertyModel>> {
+        val result = Pager(
+            config = PagingConfig(pageSize = Constants.SIZE, prefetchDistance = 5),
+            pagingSourceFactory = { propertyDao.getBookmarkedPropertiesPaginated() }).flow
+            .map { pagingData -> pagingData.map { it.toDomain() } }
 
-            return Result.success(result)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return Result.failure(e)
-        }
+        return result
     }
 
     override suspend fun refreshProperties(): Result<Unit> {

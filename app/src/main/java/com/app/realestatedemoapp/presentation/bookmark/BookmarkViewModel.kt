@@ -25,14 +25,12 @@ class BookmarkViewModel @Inject constructor(
     private val _errorMessageId = MutableStateFlow<Int?>(null)
     val errorMessageId = _errorMessageId.asStateFlow()
     val bookmarkedProperties =
-        propertyRepository.getBookmarkedProperties().onSuccess {
-            it.cachedIn(viewModelScope).stateIn(
+        propertyRepository.getBookmarkedProperties()
+            .cachedIn(viewModelScope).stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = PagingData.empty()
             )
-        }.onFailure { _errorMessageId.value = R.string.failed_to_fetch_bookmarked_properties }
-            .getOrNull()
 
 
     fun updateBookmark(propertyId: Long, isBookmarked: Boolean) {

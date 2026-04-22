@@ -22,7 +22,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
 
-    val properties = viewModel.properties?.collectAsLazyPagingItems()
+    val properties = viewModel.properties.collectAsLazyPagingItems()
     val networkStatus = viewModel.networkStatus.collectAsStateWithLifecycle()
     val errorMessage = viewModel.errorMessage.collectAsStateWithLifecycle()
 
@@ -51,13 +51,23 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
         networkStatus.value.takeIf { it == NetworkStatus.Disconnected }?.let {
             Banner(errorMsg = stringResource(R.string.no_internet_connection), isOfflineIcon = true)
         }
+
         errorMessage.value?.let { errorMsg ->
-            val isOffline = errorMsg == R.string.no_internet_connection
             LaunchedEffect(errorMsg) {
                 delay(3000)
                 viewModel.dismissError()
             }
-            Banner(errorMsg = stringResource(errorMsg), isOfflineIcon = isOffline)
+            Banner(errorMsg = stringResource(errorMsg), isOfflineIcon = false)
+        }
+        if (properties.loadState.hasError) {
+            LaunchedEffect(R.string.failed_to_fetch_properties) {
+                delay(3000)
+                viewModel.dismissError()
+            }
+            Banner(
+                errorMsg = stringResource(R.string.failed_to_fetch_properties),
+                isOfflineIcon = false
+            )
         }
     }
 }
