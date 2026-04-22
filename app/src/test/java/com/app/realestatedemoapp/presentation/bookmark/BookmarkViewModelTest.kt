@@ -1,7 +1,8 @@
 package com.app.realestatedemoapp.presentation.bookmark
 
 import androidx.paging.PagingData
-import androidx.paging.map
+import androidx.paging.testing.asSnapshot
+import app.cash.turbine.test
 import com.app.realestatedemoapp.R
 import com.app.realestatedemoapp.domain.PropertyRepository
 import com.app.realestatedemoapp.domain.model.PropertyModel
@@ -11,8 +12,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -33,7 +35,6 @@ class BookmarkViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
-
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
@@ -52,9 +53,7 @@ class BookmarkViewModelTest {
         every { propertyRepository.getBookmarkedProperties() } returns emptyFlow()
 
         viewModel = BookmarkViewModel(propertyRepository, updateBookmarkUseCase)
-
         viewModel.updateBookmark(21313, false)
-
         advanceUntilIdle()
 
         Assert.assertEquals(
@@ -67,34 +66,37 @@ class BookmarkViewModelTest {
     @Test
     fun `updateBookmark sets isBookmarked property on success and populates it in bookmarkedProperties property`() =
         runTest(testDispatcher) {
-            val flowPagingData = flowOf(
-                PagingData.from(
-                    listOf(
-                        PropertyModel(
-                            id = 1,
-                            title = "Test",
-                            price = 333333333,
-                            locality = "Test",
-                            street = "Test",
-                            imageUrl = "https://example.com/image.jpg",
-                            isBookmarked = false,
-                            currency = "CHF"
-                        )
-                    )
-                )
+            val propertyModel = PropertyModel(
+                id = 21313,
+                title = "Test",
+                price = 333333333,
+                locality = "Test",
+                street = "Test",
+                imageUrl = "https://example.com/image.jpg",
+                isBookmarked = false,
+                currency = "CHF"
             )
 
-            coEvery { updateBookmarkUseCase(21313, true) } returns Result.success(Unit)
+            val flowPagingData = MutableStateFlow(
+                PagingData.from(listOf(propertyModel))
+            )
+
             every { propertyRepository.getBookmarkedProperties() } returns flowPagingData
-            viewModel = BookmarkViewModel(propertyRepository, updateBookmarkUseCase)
-            viewModel.updateBookmark(21313, true)
-            advanceUntilIdle()
-
-            val result = viewModel.bookmarkedProperties.first()
-
-            result.map {
-                Assert.assertEquals(true, it.isBookmarked)
+            coEvery { updateBookmarkUseCase(21313, true) } answers {
+                flowPagingData.value =
+                    PagingData.from(listOf(propertyModel.copy(isBookmarked = true)))
+                Result.success(Unit)
             }
 
+            viewModel = BookmarkViewModel(propertyRepository, updateBookmarkUseCase)
+            // Skip initial state with drop
+            viewModel.bookmarkedProperties.drop(1).test {
+            viewModel.updateBookmark(21313, true)
+
+                val item = awaitItem()
+                val updatedSnapshot = flowOf(item).asSnapshot()
+
+                Assert.assertEquals(true, updatedSnapshot.first().isBookmarked)
+            }
         }
 }

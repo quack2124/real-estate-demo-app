@@ -1,7 +1,8 @@
 package com.app.realestatedemoapp.presentation.home
 
 import androidx.paging.PagingData
-import androidx.paging.map
+import androidx.paging.testing.asSnapshot
+import app.cash.turbine.test
 import com.app.realestatedemoapp.R
 import com.app.realestatedemoapp.domain.NetworkConnectivityObserver
 import com.app.realestatedemoapp.domain.PropertyRepository
@@ -14,8 +15,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -42,7 +44,7 @@ class HomeViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         propertyModel = PropertyModel(
-            id = 1,
+            id = 21313,
             title = "Test",
             price = 333333333,
             locality = "Test",
@@ -58,7 +60,6 @@ class HomeViewModelTest {
         Dispatchers.resetMain()
     }
 
-
     @Test
     fun `refreshProperties sets error message on repository failure`() = runTest(testDispatcher) {
         val exception = RuntimeException("Network Error")
@@ -72,7 +73,6 @@ class HomeViewModelTest {
         advanceUntilIdle()
         Assert.assertEquals(R.string.failed_to_fetch_properties, viewModel.errorMessage.value)
     }
-
 
     @Test
     fun `refreshProperties should not be called on connection failure`() = runTest(testDispatcher) {
@@ -101,11 +101,15 @@ class HomeViewModelTest {
         every { propertyRepository.getProperties() } returns flowPagingData
 
         viewModel = HomeViewModel(propertyRepository, updateBookmarkUseCase, connectivityObserver)
-        viewModel.refreshProperties()
         advanceUntilIdle()
 
-        Assert.assertNotNull(viewModel.properties)
+        viewModel.properties.drop(1).test {
+            viewModel.refreshProperties()
+            val item = awaitItem()
+            val updatedSnapshot = flowOf(item).asSnapshot().first()
 
+            Assert.assertEquals(propertyModel, updatedSnapshot)
+        }
     }
 
     @Test
@@ -123,12 +127,11 @@ class HomeViewModelTest {
         advanceUntilIdle()
 
         Assert.assertEquals(R.string.failed_to_update_bookmark_state, viewModel.errorMessage.value)
-
     }
 
     @Test
     fun `updateBookmark sets isBookmarked property on success`() = runTest(testDispatcher) {
-        val flowPagingData = flowOf(
+        val flowPagingData = MutableStateFlow(
             PagingData.from(
                 listOf(
                     propertyModel
@@ -136,18 +139,24 @@ class HomeViewModelTest {
             )
         )
 
-        coEvery { updateBookmarkUseCase(21313, true) } returns Result.success(Unit)
+        coEvery { updateBookmarkUseCase(21313, true) } answers {
+            flowPagingData.value = PagingData.from(listOf(propertyModel.copy(isBookmarked = true)))
+            Result.success(Unit)
+        }
+        // disable connection to avoid mocking refresh endpoint
         every { connectivityObserver.observe() } returns flowOf(NetworkStatus.Disconnected)
         every { propertyRepository.getProperties() } returns flowPagingData
         viewModel = HomeViewModel(propertyRepository, updateBookmarkUseCase, connectivityObserver)
         viewModel.updateBookmark(21313, true)
         advanceUntilIdle()
 
-        val result = viewModel.properties.first()
+        // Skip initial state with drop
+        viewModel.properties.drop(1).test {
+            viewModel.updateBookmark(21313, true)
+            val item = awaitItem()
+            val updatedSnapshot = flowOf(item).asSnapshot()
 
-        result.map {
-            Assert.assertEquals(true, it.isBookmarked)
+            Assert.assertEquals(true, updatedSnapshot.first().isBookmarked)
         }
     }
-
 }
